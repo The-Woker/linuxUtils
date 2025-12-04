@@ -24,7 +24,20 @@ int main(int argc, char *argv[]) {
     CMakeLists << "set(CMAKE_CXX_STANDARD_REQUIRED ON)\n";
     CMakeLists << "set(CMAKE_EXPORT_COMPILE_COMMANDS ON)\n\n";
 
+    CMakeLists << "find_package(Vulkan REQUIRED)\n";
+    CMakeLists << "find_package(PkgConfig REQUIRED)\n";
+    CMakeLists << "pkg_check_modules(GLFW3 REQUIRED glfw3)\n\n";
+
+    CMakeLists << "include_directories(\n"
+               << "${Vulkan_INCLUDE_DIRS}\n"
+               << "${GLFW3_INCLUDE_DIRS}\n"
+               << ")\n\n";
+
     CMakeLists << "add_executable(${PROJECT_NAME} src/main.cpp)\n\n";
+
+    CMakeLists << "target_link_libraries(${PROJECT_NAME}\n"
+               << "${Vulkan_LIBRARIES}\n"
+               << "${GLFW3_LIBRARIES}\n)";
 
     CMakeLists << "target_include_directories(${PROJECT_NAME} PUBLIC "
                   "\"${CMAKE_CURRENT_SOURCE_DIR}/include\")";
@@ -35,9 +48,13 @@ int main(int argc, char *argv[]) {
     system("mkdir include");
 
     std::ofstream main("src/main.cpp");
-    main << "#include <iostream>\n\n";
+    main << "#include <iostream>\n"
+         << "#include <vulkan/vulkan.h>\n\n";
     main << "int main() {\n"
-         << "int x;\n"
+         << "uint32_t version = 0;\n"
+         << "vkEnumerateInstanceVersion(&version);\n"
+         << "std::cout << \"Vulkan API Version: \" << \n"
+            "VK_VERSION_MAJOR(version) << \".\"\n"
          << "return 0;\n"
          << "}";
     main.close();
